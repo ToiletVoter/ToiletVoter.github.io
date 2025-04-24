@@ -9,7 +9,8 @@
     <script>
       const supabaseUrl = 'https://wzvmortgwqhwocgewudd.supabase.co';
       const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6dm1vcnRnd3Fod29jZ2V3dWRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU0ODg1ODMsImV4cCI6MjA2MTA2NDU4M30.U_tGy-YbuyE4pWkRNYWSe9L9UGqAb5aCMHJPLD9ZaxI';
-      const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+      // Hernoem deze variabele:
+      const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
     </script>
 </head>
 <body>
@@ -82,7 +83,7 @@
             // 1. Upload foto naar Supabase Storage
             const fileExt = photoFile.name.split('.').pop();
             const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .storage
                 .from('profile-photos')
                 .upload(fileName, photoFile);
@@ -90,20 +91,21 @@
             if (error) throw error;
 
             // 2. Genereer public URL
-            const { data: publicUrlData } = supabase
+            const { publicURL, error: publicUrlError } = supabaseClient
                 .storage
                 .from('profile-photos')
                 .getPublicUrl(fileName);
-            const photoURL = publicUrlData.publicUrl;
+
+            if (publicUrlError) throw publicUrlError;
 
             // 3. Sla deelnemer op in Supabase tabel
-            const { error: dbError } = await supabase
+            const { error: dbError } = await supabaseClient
                 .from('participants')
                 .insert([{
                     name,
                     expertise,
                     company,
-                    photo_url: photoURL,
+                    photo_url: publicURL,
                     timestamp: new Date().toISOString()
                 }]);
 

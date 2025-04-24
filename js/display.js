@@ -89,7 +89,7 @@ function createParticipantBubble(participant, container) {
 async function updateDisplay() {
     const displayContainer = document.getElementById('display-container');
     // Haal deelnemers op uit Supabase
-    let { data: participants, error } = await supabase
+    let { data: participants, error } = await window.supabaseClient
         .from('participants')
         .select('*')
         .order('timestamp', { ascending: true });
@@ -114,7 +114,7 @@ async function updateDisplay() {
 // Exporteer naar CSV (uit Supabase)
 async function exportToCSV() {
     try {
-        let { data: participants, error } = await supabase
+        let { data: participants, error } = await window.supabaseClient
             .from('participants')
             .select('*')
             .order('timestamp', { ascending: true });
