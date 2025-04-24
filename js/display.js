@@ -204,11 +204,23 @@ document.addEventListener('DOMContentLoaded', function() {
         resetModal.style.display = 'none';
     });
 
-    confirmReset.addEventListener('click', function() {
-        // Alleen het display leegmaken, niet uit Supabase wissen
+    confirmReset.addEventListener('click', async function() {
+    try {
+        // Verwijder alle deelnemers uit Supabase (pas 'id' aan naar jouw echte kolomnaam)
+        let { error } = await window.supabaseClient
+            .from('participants')
+            .delete()
+            .neq('id', 0);
+
+        if (error) throw error;
+
         displayContainer.innerHTML = '';
         document.getElementById('participant-count').textContent = 'Aantal ingecheckt: 0';
         resetModal.style.display = 'none';
-        alert('Deelnemers zijn uit het beeld verwijderd (niet uit Supabase).');
-    });
+        alert('Alle deelnemers zijn verwijderd uit Supabase én het display.');
+    } catch (error) {
+        alert("Fout bij resetten deelnemers: " + error.message);
+    }
+});
+
 });
