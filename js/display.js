@@ -85,26 +85,38 @@ function createParticipantBubble(participant, container) {
     return bubble;
 }
 
-// Update het display met huidige deelnemers (haalt uit Supabase)
+// Nieuwe aanpak: bubbels worden alleen toegevoegd/verwijderd, niet steeds hermaakt
 async function updateDisplay() {
     const displayContainer = document.getElementById('display-container');
-    // Haal deelnemers op uit Supabase
     let { data: participants, error } = await window.supabaseClient
         .from('participants')
         .select('*')
         .order('timestamp', { ascending: true });
+
     if (error) {
         console.error("Fout bij ophalen deelnemers:", error);
         participants = [];
     }
 
-    // Verwijder bestaande bubbels
-    displayContainer.innerHTML = '';
+    // Huidige bubbels ophalen
+    const existingBubbles = {};
+    displayContainer.querySelectorAll('.participant-bubble').forEach(bubble => {
+        existingBubbles[bubble.dataset.timestamp] = bubble;
+    });
 
-    // Voeg nieuwe deelnemers toe
+    // Verwijder bubbels die niet meer in de deelnemerslijst staan
+    Object.keys(existingBubbles).forEach(ts => {
+        if (!participants.find(p => String(p.timestamp) === String(ts))) {
+            existingBubbles[ts].remove();
+        }
+    });
+
+    // Voeg nieuwe bubbels toe als ze nog niet bestaan
     participants.forEach(participant => {
-        const bubble = createParticipantBubble(participant, displayContainer);
-        displayContainer.appendChild(bubble);
+        if (!existingBubbles[participant.timestamp]) {
+            const bubble = createParticipantBubble(participant, displayContainer);
+            displayContainer.appendChild(bubble);
+        }
     });
 
     // Update aantal deelnemers
