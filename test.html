@@ -2,19 +2,19 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
-  <title>Test Supabase</title>
+  <title>Supabase test</title>
+  <!-- EERST de Supabase library -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@1"></script>
-  <script>
-    // Dit moet werken
-    const supabaseUrl = 'https://wzvmortgwqhwocgewudd.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6dm1vcnRnd3Fod29jZ2V3dWRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU0ODg1ODMsImV4cCI6MjA2MTA2NDU4M30.U_tGy-YbuyE4pWkRNYWSe9L9UGqAb5aCMHJPLD9ZaxI';
-    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
-
-    // Test of supabase werkt
-    console.log('Supabase:', supabase);
-  </script>
 </head>
 <body>
   <h1>Supabase test</h1>
+  <!-- DAN pas je eigen code -->
+  <script>
+    const supabaseUrl = 'https://wzvmortgwqhwocgewudd.supabase.co';
+    const supabaseKey = 'YeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6dm1vcnRnd3Fod29jZ2V3dWRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU0ODg1ODMsImV4cCI6MjA2MTA2NDU4M30.U_tGy-YbuyE4pWkRNYWSe9L9UGqAb5aCMHJPLD9ZaxI';
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+    console.log('Supabase:', supabase);
+  </script>
 </body>
 </html>
