@@ -1,1 +1,26 @@
-Hello World
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Netwerkevenement Display</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Netwerkevenement Deelnemers</h1>
+            <div class="controls">
+                <span id="participant-count">Aantal ingecheckt: 0</span>
+                <button id="export-button">Exporteer naar CSV</button>
+            </div>
+        </header>
+        
+        <div id="display-container">
+            <!-- Hier worden de deelnemers dynamisch toegevoegd -->
+        </div>
+    </div>
+    
+    <script src="js/display.js"></script>
+</body>
+</html>

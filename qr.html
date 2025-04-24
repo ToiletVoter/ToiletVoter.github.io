@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Netwerkevenement QR Code</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+</head>
+<body>
+    <div class="qr-container">
+        <h1>Netwerkevenement QR Code</h1>
+        
+        <div class="instruction">
+            <p>Scan deze QR-code om naar de registratiepagina te gaan en in te checken voor het evenement.</p>
+        </div>
+        
+        <div id="qrcode"></div>
+        
+        <div class="instruction">
+            <p>U kunt deze pagina afdrukken of op een scherm bij de ingang weergeven.</p>
+        </div>
+        
+        <button id="print-button">Print QR Code</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // URL naar de registratiepagina
+            const currentUrl = window.location.href;
+            const baseUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/') + 1);
+            const registerUrl = baseUrl + 'register.html';
+            
+            // QR code genereren
+            const qr = qrcode(0, 'M');
+            qr.addData(registerUrl);
+            qr.make();
+            
+            document.getElementById('qrcode').innerHTML = qr.createImgTag(8);
+            
+            // Print knop configureren
+            document.getElementById('print-button').addEventListener('click', function() {
+                window.print();
+            });
+        });
+    </script>
+</body>
+</html>

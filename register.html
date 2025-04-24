@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evenement Registratie</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="registration-container">
+        <h1>Welkom bij het Netwerkevenement</h1>
+        <form id="registrationForm">
+            <div class="form-group">
+                <label for="name">Volledige naam:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="photo">Profielfoto:</label>
+                <input type="file" id="photo" name="photo" accept="image/*" required>
+                <div id="photo-preview"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="expertise">Expertise/Rol (max 3 trefwoorden):</label>
+                <input type="text" id="expertise" name="expertise" placeholder="bijv. Marketing, AI, Projectmanagement" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="company">Bedrijf/Organisatie:</label>
+                <input type="text" id="company" name="company">
+            </div>
+            
+            <button type="submit">Inchecken</button>
+        </form>
+    </div>
+
+    <script>
+        // Foto preview weergeven
+        document.getElementById('photo').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = document.createElement('img');
+                    img.src = event.target.result;
+                    
+                    const photoPreview = document.getElementById('photo-preview');
+                    photoPreview.innerHTML = '';
+                    photoPreview.appendChild(img);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // Registratiegegevens verzenden
+        document.getElementById('registrationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Gegevens verzamelen
+            const name = document.getElementById('name').value;
+            const expertiseInput = document.getElementById('expertise').value;
+            const company = document.getElementById('company').value;
+            
+            // Expertise opsplitsen in trefwoorden en maximaal 3 nemen
+            const expertise = expertiseInput.split(',')
+                .map(item => item.trim())
+                .filter(item => item !== '')
+                .slice(0, 3);
+            
+            // Foto verwerken
+            const photoFile = document.getElementById('photo').files[0];
+            const reader = new FileReader();
+            
+            reader.onload = function(event) {
+                const photoData = event.target.result;
+                
+                // Hier zouden we normaal de data naar een server sturen,
+                // maar voor demo slaan we het op in localStorage
+                const participant = {
+                    name,
+                    photo: photoData,
+                    expertise,
+                    company,
+                    timestamp: new Date().toISOString()
+                };
+                
+                // Bestaande deelnemers ophalen en nieuwe toevoegen
+                let participants = JSON.parse(localStorage.getItem('eventParticipants') || '[]');
+                participants.push(participant);
+                localStorage.setItem('eventParticipants', JSON.stringify(participants));
+                
+                alert('Succesvol ingecheckt! Welkom bij het evenement.');
+                
+                // Formulier resetten
+                document.getElementById('registrationForm').reset();
+                document.getElementById('photo-preview').innerHTML = '';
+            };
+            
+            reader.readAsDataURL(photoFile);
+        });
+    </script>
+</body>
+</html>
