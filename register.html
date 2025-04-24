@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Evenement Registratie</title>
     <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+      const supabaseUrl = 'https://wzvmortgwqhwocgewudd.supabase.co';
+      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6dm1vcnRnd3Fod29jZ2V3dWRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU0ODg1ODMsImV4cCI6MjA2MTA2NDU4M30.U_tGy-YbuyE4pWkRNYWSe9L9UGqAb5aCMHJPLD9ZaxI';
+      const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+    </script>
 </head>
 <body>
     <div class="registration-container">
@@ -52,79 +58,66 @@
             reader.readAsDataURL(file);
         }
     });
-    
-    // Registratiegegevens verzenden
-    document.getElementById('registrationForm').addEventListener('submit', function(e) {
+
+    // Registratiegegevens verzenden met Supabase
+    document.getElementById('registrationForm').addEventListener('submit', async function(e) {
         e.preventDefault();
-        
+
+        const name = document.getElementById('name').value;
+        const expertiseInput = document.getElementById('expertise').value;
+        const company = document.getElementById('company').value;
+        const photoFile = document.getElementById('photo').files[0];
+
+        const expertise = expertiseInput.split(',')
+            .map(item => item.trim())
+            .filter(item => item !== '')
+            .slice(0, 3);
+
+        if (!photoFile) {
+            alert('Kies alstublieft een profielfoto.');
+            return;
+        }
+
         try {
-            // Gegevens verzamelen
-            const name = document.getElementById('name').value;
-            const expertiseInput = document.getElementById('expertise').value;
-            const company = document.getElementById('company').value;
-            
-            // Expertise opsplitsen in trefwoorden en maximaal 3 nemen
-            const expertise = expertiseInput.split(',')
-                .map(item => item.trim())
-                .filter(item => item !== '')
-                .slice(0, 3);
-            
-            // Foto verwerken
-            const photoFile = document.getElementById('photo').files[0];
-            if (!photoFile) {
-                alert('Kies alstublieft een profielfoto.');
-                return;
-            }
-            
-            const reader = new FileReader();
-            
-            reader.onload = function(event) {
-                try {
-                    const photoData = event.target.result;
-                    
-                    // Hier zouden we normaal de data naar een server sturen,
-                    // maar voor demo slaan we het op in localStorage
-                    const participant = {
-                        name,
-                        photo: photoData,
-                        expertise,
-                        company,
-                        timestamp: new Date().toISOString()
-                    };
-                    
-                    // Bestaande deelnemers ophalen en nieuwe toevoegen
-                    let participants = [];
-                    try {
-                        participants = JSON.parse(localStorage.getItem('eventParticipants') || '[]');
-                    } catch (e) {
-                        console.error("Fout bij ophalen van deelnemers:", e);
-                        participants = [];
-                    }
-                    
-                    participants.push(participant);
-                    localStorage.setItem('eventParticipants', JSON.stringify(participants));
-                    
-                    alert('Succesvol ingecheckt! Welkom bij het evenement.');
-                    
-                    // Formulier resetten
-                    document.getElementById('registrationForm').reset();
-                    document.getElementById('photo-preview').innerHTML = '';
-                } catch (error) {
-                    console.error("Fout bij verwerken van foto:", error);
-                    alert("Er is een fout opgetreden: " + error.message);
-                }
-            };
-            
-            reader.onerror = function() {
-                alert("Er is een fout opgetreden bij het lezen van de foto.");
-            };
-            
-            reader.readAsDataURL(photoFile);
+            // 1. Upload foto naar Supabase Storage
+            const fileExt = photoFile.name.split('.').pop();
+            const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+            const { data, error } = await supabase
+                .storage
+                .from('profile-photos')
+                .upload(fileName, photoFile);
+
+            if (error) throw error;
+
+            // 2. Genereer public URL
+            const { data: publicUrlData } = supabase
+                .storage
+                .from('profile-photos')
+                .getPublicUrl(fileName);
+            const photoURL = publicUrlData.publicUrl;
+
+            // 3. Sla deelnemer op in Supabase tabel
+            const { error: dbError } = await supabase
+                .from('participants')
+                .insert([{
+                    name,
+                    expertise,
+                    company,
+                    photo_url: photoURL,
+                    timestamp: new Date().toISOString()
+                }]);
+
+            if (dbError) throw dbError;
+
+            alert('Succesvol ingecheckt! Welkom bij het evenement.');
+            document.getElementById('registrationForm').reset();
+            document.getElementById('photo-preview').innerHTML = '';
+
         } catch (error) {
             console.error("Fout bij registratie:", error);
             alert("Er is een fout opgetreden: " + error.message);
         }
     });
-</script>
+    </script>
 </body>
 </html>
