@@ -36,27 +36,28 @@
     </div>
 
     <script>
-        // Foto preview weergeven
-        document.getElementById('photo').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const img = document.createElement('img');
-                    img.src = event.target.result;
-                    
-                    const photoPreview = document.getElementById('photo-preview');
-                    photoPreview.innerHTML = '';
-                    photoPreview.appendChild(img);
-                }
-                reader.readAsDataURL(file);
+    // Foto preview weergeven
+    document.getElementById('photo').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = document.createElement('img');
+                img.src = event.target.result;
+                
+                const photoPreview = document.getElementById('photo-preview');
+                photoPreview.innerHTML = '';
+                photoPreview.appendChild(img);
             }
-        });
+            reader.readAsDataURL(file);
+        }
+    });
+    
+    // Registratiegegevens verzenden
+    document.getElementById('registrationForm').addEventListener('submit', function(e) {
+        e.preventDefault();
         
-        // Registratiegegevens verzenden
-        document.getElementById('registrationForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
+        try {
             // Gegevens verzamelen
             const name = document.getElementById('name').value;
             const expertiseInput = document.getElementById('expertise').value;
@@ -70,35 +71,60 @@
             
             // Foto verwerken
             const photoFile = document.getElementById('photo').files[0];
+            if (!photoFile) {
+                alert('Kies alstublieft een profielfoto.');
+                return;
+            }
+            
             const reader = new FileReader();
             
             reader.onload = function(event) {
-                const photoData = event.target.result;
-                
-                // Hier zouden we normaal de data naar een server sturen,
-                // maar voor demo slaan we het op in localStorage
-                const participant = {
-                    name,
-                    photo: photoData,
-                    expertise,
-                    company,
-                    timestamp: new Date().toISOString()
-                };
-                
-                // Bestaande deelnemers ophalen en nieuwe toevoegen
-                let participants = JSON.parse(localStorage.getItem('eventParticipants') || '[]');
-                participants.push(participant);
-                localStorage.setItem('eventParticipants', JSON.stringify(participants));
-                
-                alert('Succesvol ingecheckt! Welkom bij het evenement.');
-                
-                // Formulier resetten
-                document.getElementById('registrationForm').reset();
-                document.getElementById('photo-preview').innerHTML = '';
+                try {
+                    const photoData = event.target.result;
+                    
+                    // Hier zouden we normaal de data naar een server sturen,
+                    // maar voor demo slaan we het op in localStorage
+                    const participant = {
+                        name,
+                        photo: photoData,
+                        expertise,
+                        company,
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    // Bestaande deelnemers ophalen en nieuwe toevoegen
+                    let participants = [];
+                    try {
+                        participants = JSON.parse(localStorage.getItem('eventParticipants') || '[]');
+                    } catch (e) {
+                        console.error("Fout bij ophalen van deelnemers:", e);
+                        participants = [];
+                    }
+                    
+                    participants.push(participant);
+                    localStorage.setItem('eventParticipants', JSON.stringify(participants));
+                    
+                    alert('Succesvol ingecheckt! Welkom bij het evenement.');
+                    
+                    // Formulier resetten
+                    document.getElementById('registrationForm').reset();
+                    document.getElementById('photo-preview').innerHTML = '';
+                } catch (error) {
+                    console.error("Fout bij verwerken van foto:", error);
+                    alert("Er is een fout opgetreden: " + error.message);
+                }
+            };
+            
+            reader.onerror = function() {
+                alert("Er is een fout opgetreden bij het lezen van de foto.");
             };
             
             reader.readAsDataURL(photoFile);
-        });
-    </script>
+        } catch (error) {
+            console.error("Fout bij registratie:", error);
+            alert("Er is een fout opgetreden: " + error.message);
+        }
+    });
+</script>
 </body>
 </html>

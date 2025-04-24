@@ -9,18 +9,28 @@
 <body>
     <div class="container">
         <header>
-            <h1>Netwerkevenement Deelnemers</h1>
-            <div class="controls">
-                <span id="participant-count">Aantal ingecheckt: 0</span>
-                <button id="export-button">Exporteer naar CSV</button>
-            </div>
-        </header>
-        
+    <h1>Netwerkevenement Deelnemers</h1>
+    <div class="controls">
+        <span id="participant-count">Aantal ingecheckt: 0</span>
+        <button id="export-button">Exporteer naar CSV</button>
+        <button id="reset-button" class="reset-button">Reset Deelnemers</button>
+    </div>
+</header>        
         <div id="display-container">
             <!-- Hier worden de deelnemers dynamisch toegevoegd -->
         </div>
     </div>
     
     <script src="js/display.js"></script>
+    <div id="reset-modal" class="modal">
+    <div class="modal-content">
+        <h2>Bevestig Reset</h2>
+        <p>Weet je zeker dat je alle deelnemers wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.</p>
+        <div class="modal-buttons">
+            <button id="confirm-reset" class="modal-button confirm-button">Ja, Reset Alles</button>
+            <button id="cancel-reset" class="modal-button cancel-button">Annuleren</button>
+        </div>
+    </div>
+</div>
 </body>
 </html>

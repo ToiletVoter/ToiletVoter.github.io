@@ -134,6 +134,11 @@ function exportToCSV() {
     try {
         const participants = JSON.parse(localStorage.getItem('eventParticipants') || '[]');
         
+        if (participants.length === 0) {
+            alert("Er zijn nog geen deelnemers om te exporteren.");
+            return;
+        }
+        
         // CSV header
         const csvRows = [
             ['Naam', 'Bedrijf', 'Expertise', 'Inchecktijd'].join(',')
@@ -141,12 +146,14 @@ function exportToCSV() {
         
         // Data toevoegen
         participants.forEach(p => {
+            const expertiseStr = Array.isArray(p.expertise) ? p.expertise.join('; ') : p.expertise;
+            
             const row = [
-                p.name,
-                p.company,
-                p.expertise.join('; '),
+                p.name || '',
+                p.company || '',
+                expertiseStr || '',
                 new Date(p.timestamp).toLocaleString()
-            ].map(item => `"${item}"`).join(',');
+            ].map(item => `"${String(item).replace(/"/g, '""')}"`).join(',');
             
             csvRows.push(row);
         });
@@ -164,9 +171,10 @@ function exportToCSV() {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        URL.revokeObjectURL(url); // Geheugenlek voorkomen
     } catch (error) {
         console.error("Fout bij exporteren:", error);
-        alert("Er is een fout opgetreden bij het exporteren van de gegevens.");
+        alert("Er is een fout opgetreden bij het exporteren van de gegevens: " + error.message);
     }
 }
 
@@ -190,4 +198,34 @@ document.addEventListener('DOMContentLoaded', function() {
             moveBubble(bubble, displayContainer.offsetWidth, displayContainer.offsetHeight);
         });
     }, UPDATE_INTERVAL);
+    // Reset functionaliteit
+const resetButton = document.getElementById('reset-button');
+const resetModal = document.getElementById('reset-modal');
+const confirmReset = document.getElementById('confirm-reset');
+const cancelReset = document.getElementById('cancel-reset');
+
+resetButton.addEventListener('click', function() {
+    resetModal.style.display = 'flex';
+});
+
+cancelReset.addEventListener('click', function() {
+    resetModal.style.display = 'none';
+});
+
+confirmReset.addEventListener('click', function() {
+    // Deelnemers verwijderen
+    localStorage.removeItem('eventParticipants');
+    
+    // Display leegmaken
+    const displayContainer = document.getElementById('display-container');
+    displayContainer.innerHTML = '';
+    
+    // Aantal bijwerken
+    document.getElementById('participant-count').textContent = 'Aantal ingecheckt: 0';
+    
+    // Modal sluiten
+    resetModal.style.display = 'none';
+    
+    alert('Alle deelnemers zijn succesvol verwijderd.');
+});
 });
