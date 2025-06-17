@@ -226,8 +226,9 @@ document.addEventListener('DOMContentLoaded', function() {
             // Bepaal de paden van de foto's binnen de bucket
             const photoPaths = (participants || [])
                 .map(p => {
-                    const match = p.photo_url && p.photo_url.match(/profile-photos\/(.+)$/);
-                    return match ? match[1] : null;
+                    if (!p.photo_url) return null;
+                    const path = new URL(p.photo_url).pathname.split('/profile-photos/')[1];
+                    return path || null;
                 })
                 .filter(Boolean);
 
