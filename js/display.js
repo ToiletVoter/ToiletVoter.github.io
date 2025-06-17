@@ -114,8 +114,18 @@ async function updateDisplay() {
     // Voeg nieuwe bubbels toe als ze nog niet bestaan
     participants.forEach(participant => {
         if (!existingBubbles[participant.timestamp]) {
+            // Markeer nieuwe deelnemers zodat de pop-animatie wordt getoond
+            newParticipantTimestamps.push(participant.timestamp);
             const bubble = createParticipantBubble(participant, displayContainer);
             displayContainer.appendChild(bubble);
+
+            // Verwijder de timestamp na de animatie zodat het niet opnieuw wordt toegepast
+            setTimeout(() => {
+                const index = newParticipantTimestamps.indexOf(participant.timestamp);
+                if (index !== -1) {
+                    newParticipantTimestamps.splice(index, 1);
+                }
+            }, 2000); // duur van de pop animatie
         }
     });
 
