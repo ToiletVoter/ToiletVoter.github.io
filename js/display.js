@@ -215,22 +215,47 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     confirmReset.addEventListener('click', async function() {
-    try {
-        // Verwijder alle deelnemers uit Supabase (pas 'id' aan naar jouw echte kolomnaam)
-        let { error } = await window.supabaseClient
-            .from('participants')
-            .delete()
-            .neq('id', 0);
+        try {
+            // Haal alle deelnemers op om de bestandsnamen van de foto's te weten
+            const { data: participants, error: fetchError } = await window.supabaseClient
+                .from('participants')
+                .select('photo_url');
 
-        if (error) throw error;
+            if (fetchError) throw fetchError;
 
-        displayContainer.innerHTML = '';
-        document.getElementById('participant-count').textContent = 'Aantal ingecheckt: 0';
-        resetModal.style.display = 'none';
-        alert('Alle deelnemers zijn verwijderd uit Supabase én het display.');
-    } catch (error) {
-        alert("Fout bij resetten deelnemers: " + error.message);
-    }
-});
+            // Bepaal de paden van de foto's binnen de bucket
+            const photoPaths = (participants || [])
+                .map(p => {
+                    if (!p.photo_url) return null;
+                    const path = new URL(p.photo_url).pathname.split('/profile-photos/')[1];
+                    return path || null;
+                })
+                .filter(Boolean);
+
+            if (photoPaths.length) {
+                const { error: storageError } = await window.supabaseClient
+                    .storage
+                    .from('profile-photos')
+                    .remove(photoPaths);
+
+                if (storageError) throw storageError;
+            }
+
+            // Verwijder alle deelnemers uit Supabase
+            const { error } = await window.supabaseClient
+                .from('participants')
+                .delete()
+                .neq('id', 0);
+
+            if (error) throw error;
+
+            displayContainer.innerHTML = '';
+            document.getElementById('participant-count').textContent = 'Aantal ingecheckt: 0';
+            resetModal.style.display = 'none';
+            alert('Alle deelnemers en profielfoto\'s zijn verwijderd.');
+        } catch (error) {
+            alert("Fout bij resetten deelnemers: " + error.message);
+        }
+    });
 
 });
