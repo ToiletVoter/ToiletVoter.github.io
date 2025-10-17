@@ -90,11 +90,44 @@
     }
 
     async function resetParticipants(){
-      if(!confirm('Weet je zeker dat je ALLE deelnemers wilt verwijderen?')) return;
-      const { error } = await sb.from('participants').delete().neq('id', null);
-      if(error){ alert('Reset mislukt: ' + error.message); return; }
-      alert('Alle deelnemers verwijderd.');
+    if(!confirm('Weet je zeker dat je ALLE deelnemers wilt verwijderen?')) return;
+
+    try {
+      // 1) alle fotobestanden in de bucket verwijderen
+      const { data: participants, error: fetchErr } = await sb
+        .from('participants')
+        .select('photo_url');
+
+      if (fetchErr) throw fetchErr;
+
+      const photoPaths = (participants || [])
+        .map(p => {
+          const m = p.photo_url && p.photo_url.match(/profile-photos\/(.+)$/);
+          return m ? m[1] : null;
+        })
+        .filter(Boolean);
+
+      if (photoPaths.length) {
+        const { error: storageErr } = await sb.storage
+          .from('profile-photos')
+          .remove(photoPaths);
+        if (storageErr) throw storageErr;
+      }
+
+      // 2) alle rijen verwijderen zonder “null”-cast
+      // not('id','is', null) → vertaalt naar not.is.null (correct voor bigint)
+      const { error: delErr } = await sb
+        .from('participants')
+        .delete()
+        .not('id', 'is', null);
+
+      if (delErr) throw delErr;
+
+      alert('Alle deelnemers en profielfoto’s zijn verwijderd.');
+    } catch (e) {
+      alert('Reset mislukt: ' + e.message);
     }
+  }
 
     document.addEventListener('DOMContentLoaded', async ()=>{
       const s = await loadSettings();
