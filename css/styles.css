@@ -1,249 +1,130 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+:root{
+  --primary: #008387;         /* header, randen */
+  --btn: #3498db;             /* knoppen */
+  --btn-hover: #2980b9;       /* hover */
+  --tag-bg: #e1f0fa;          /* expertise tag */
+  --page-bg: #f5f5f5;         /* body */
+  --stage-bg: #f9f9f9;        /* display container */
+  --text: #ffffff;
 }
 
+* { margin:0; padding:0; box-sizing:border-box; }
+
 body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f5f5f5;
+  font-family: 'Arial', sans-serif;
+  background-color: var(--page-bg);
 }
 
 .container {
-    width: 100%;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 header {
-    background-color: #008387;
-    color: white;
-    padding: 15px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  background-color: var(--primary);
+  color: var(--text);
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-header h1 {
-    font-size: 24px;
-}
+header h1 { font-size: 24px; }
 
-.controls {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
+.controls { display:flex; align-items:center; gap:20px; }
 
-#export-button {
-    background-color: white;
-    color: #3498db;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
-    font-weight: bold;
-    cursor: pointer;
+/* algemene knopstijl */
+button {
+  background-color: var(--btn);
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
 }
+button:hover { background-color: var(--btn-hover); }
 
 #display-container {
-    flex-grow: 1;
-    position: relative;
-    background-color: #f9f9f9;
-    overflow: hidden;
+  flex-grow: 1;
+  position: relative;
+  background-color: var(--stage-bg);
+  overflow: hidden;
 }
 
 /* Deelnemer bubbel stijl */
 .participant-bubble {
-    position: absolute;
-    width: 150px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    transition: transform 0.3s ease;
+  position: absolute;
+  width: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.3s ease;
 }
-
-.participant-bubble.new {
-    animation: pop 2s forwards;
-}
-
+.participant-bubble.new { animation: pop 2s forwards; }
 @keyframes pop {
-    0% { transform: scale(1); }
-    15% { transform: scale(1.25); }
-    30% { transform: scale(1.15); }
-    45% { transform: scale(1.2); }
-    100% { transform: scale(1); }
+  0% { transform: scale(1); }
+  15% { transform: scale(1.25); }
+  30% { transform: scale(1.15); }
+  45% { transform: scale(1.2); }
+  100% { transform: scale(1); }
 }
 
 .photo-circle {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    overflow: hidden;
-    border: 4px solid #008387;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    margin-bottom: 8px;
+  width: 100px; height: 100px; border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid var(--primary);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  margin-bottom: 8px;
 }
+.photo-circle img { width:100%; height:100%; object-fit:cover; }
 
-.photo-circle img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.participant-info {
-    text-align: center;
-}
-
-.participant-info h3 {
-    font-size: 14px;
-    margin-bottom: 3px;
-}
-
-.participant-info p {
-    font-size: 12px;
-    color: #666;
-}
+.participant-info { text-align:center; }
+.participant-info h3 { font-size:14px; margin-bottom:3px; }
+.participant-info p { font-size:12px; color:#666; }
 
 .expertise-tag {
-    background-color: #e1f0fa;
-    border-radius: 12px;
-    padding: 3px 8px;
-    font-size: 11px;
-    margin-top: 4px;
-    display: inline-block;
+  background-color: var(--tag-bg);
+  border-radius: 12px;
+  padding: 3px 8px;
+  font-size: 11px;
+  margin-top: 4px;
+  display: inline-block;
 }
 
-/* Registratiepagina stijlen */
-.registration-container {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-}
-
+/* Registratiepagina */
+.registration-container { max-width:600px; margin:0 auto; padding:20px; }
+.form-group { margin-bottom:15px; }
+.form-group label { display:block; margin-bottom:5px; font-weight:bold; }
 .form-group input, .form-group textarea {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+  width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;
 }
-
 #photo-preview {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    background-color: #eee;
-    margin: 10px auto;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  width:150px; height:150px; border-radius:50%;
+  background-color:#eee; margin:10px auto; overflow:hidden;
+  display:flex; align-items:center; justify-content:center;
 }
-
-#photo-preview img {
-    max-width: 100%;
-    max-height: 100%;
-}
-
-button {
-    background-color: #3498db;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-button:hover {
-    background-color: #2980b9;
-}
+#photo-preview img { max-width:100%; max-height:100%; }
 
 /* QR Code pagina */
 .qr-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    text-align: center;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  height:100vh; text-align:center;
 }
+#qrcode { margin:30px auto; }
+.instruction { max-width:600px; margin:20px auto; line-height:1.6; }
 
-#qrcode {
-    margin: 30px auto;
-}
+/* reset-knop (alleen admin straks) */
+.reset-button { background-color:#e74c3c; color:white; }
+.reset-button:hover { background-color:#c0392b; }
 
-.instruction {
-    max-width: 600px;
-    margin: 20px auto;
-    line-height: 1.6;
-}
-.reset-button {
-    background-color: #e74c3c;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
-    font-weight: bold;
-    cursor: pointer;
-    margin-left: 10px;
-}
-
-.reset-button:hover {
-    background-color: #c0392b;
-}
-
-/* Voor een bevestigingsmodal */
-.modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.5);
-    z-index: 1000;
-    justify-content: center;
-    align-items: center;
-}
-
-.modal-content {
-    background-color: white;
-    padding: 20px;
-    border-radius: 5px;
-    width: 300px;
-    text-align: center;
-}
-
-.modal-buttons {
-    margin-top: 20px;
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-}
-
-.modal-button {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.confirm-button {
-    background-color: #e74c3c;
-    color: white;
-}
-
-.cancel-button {
-    background-color: #7f8c8d;
-    color: white;
-}
+/* modal (laat je code staan als je die elders gebruikt) */
+.modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+  background-color:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center; }
+.modal-content { background-color:white; padding:20px; border-radius:5px; width:300px; text-align:center; }
+.modal-buttons { margin-top:20px; display:flex; justify-content:center; gap:10px; }
+.modal-button { padding:8px 16px; border:none; border-radius:4px; cursor:pointer; }
+.confirm-button { background-color:#e74c3c; color:white; }
+.cancel-button { background-color:#7f8c8d; color:white; }

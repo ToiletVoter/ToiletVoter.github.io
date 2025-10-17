@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin</title>
+  <link rel="stylesheet" href="css/styles.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@1"></script>
+  <style>
+    .admin-wrap{max-width:720px;margin:40px auto;padding:20px;background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+    .grid{display:grid;gap:16px}
+    .cols-2{grid-template-columns:1fr 1fr}
+    .section{margin-top:24px}
+    .muted{color:#666;font-size:.9rem}
+    input[type="text"]{width:100%;padding:8px;border:1px solid #ddd;border-radius:4px}
+    input[type="color"]{width:100%;height:40px;border:none;background:none}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+  </style>
+  <script>
+    const supabaseUrl = 'https://wzvmortgwqhwocgewudd.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6dm1vcnRnd3Fod29jZ2V3dWRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU0ODg1ODMsImV4cCI6MjA2MTA2NDU4M30.U_tGy-YbuyE4pWkRNYWSe9L9UGqAb5aCMHJPLD9ZaxI';
+    const sb = supabase.createClient(supabaseUrl, supabaseKey);
+
+    const defaults = {
+      title: 'Onderzoeksbijeenkomst AI & Health',
+      register_title: 'Onderzoeksbijeenkomst AI & Health',
+      language: 'nl',
+      primary_color: '#008387',
+      button_color: '#3498db',
+      button_hover_color: '#2980b9',
+      tag_bg_color: '#e1f0fa'
+    };
+
+    async function loadSettings(){
+      const { data, error } = await sb.from('settings').select('*').eq('id','global').single();
+      if(error){ console.warn(error); return defaults; }
+      return { ...defaults, ...data };
+    }
+
+    async function saveSettings(e){
+      e.preventDefault();
+      const form = e.target;
+      const payload = {
+        id:'global',
+        title: form.title.value.trim() || defaults.title,
+        register_title: form.register_title.value.trim() || defaults.register_title,
+        language: form.language.value,
+        primary_color: form.primary_color.value,
+        button_color: form.button_color.value,
+        button_hover_color: form.button_hover_color.value,
+        tag_bg_color: form.tag_bg_color.value
+      };
+      const { error } = await sb.from('settings').upsert(payload);
+      if(error){ alert('Opslaan mislukt: ' + error.message); return; }
+      alert('Instellingen opgeslagen.');
+    }
+
+    function resetColors(){
+      document.getElementById('primary_color').value = defaults.primary_color;
+      document.getElementById('button_color').value = defaults.button_color;
+      document.getElementById('button_hover_color').value = defaults.button_hover_color;
+      document.getElementById('tag_bg_color').value = defaults.tag_bg_color;
+    }
+
+    async function exportCSV(){
+      const { data, error } = await sb.from('participants').select('*').order('timestamp',{ascending:true});
+      if(error){ alert('Export mislukt: ' + error.message); return; }
+      const rows = data || [];
+      const headers = ['name','expertise','company','photo_url','timestamp'];
+      const csv = [
+        headers.join(','),
+        ...rows.map(r=>{
+          const exp = Array.isArray(r.expertise)? r.expertise.join('|') : (r.expertise || '');
+          return [
+            (r.name||'').replace(/"/g,'""'),
+            exp.replace(/"/g,'""'),
+            (r.company||'').replace(/"/g,'""'),
+            (r.photo_url||'').replace(/"/g,'""'),
+            r.timestamp||''
+          ].map(v=>`"${v}"`).join(',');
+        })
+      ].join('\n');
+
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `participants_${new Date().toISOString().slice(0,19)}.csv`;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    async function resetParticipants(){
+      if(!confirm('Weet je zeker dat je ALLE deelnemers wilt verwijderen?')) return;
+      const { error } = await sb.from('participants').delete().neq('id', null);
+      if(error){ alert('Reset mislukt: ' + error.message); return; }
+      alert('Alle deelnemers verwijderd.');
+    }
+
+    document.addEventListener('DOMContentLoaded', async ()=>{
+      const s = await loadSettings();
+      document.getElementById('title').value = s.title;
+      document.getElementById('register_title').value = s.register_title || s.title;
+      document.querySelector(`input[name="language"][value="${s.language}"]`).checked = true;
+      document.getElementById('primary_color').value = s.primary_color;
+      document.getElementById('button_color').value = s.button_color;
+      document.getElementById('button_hover_color').value = s.button_hover_color;
+      document.getElementById('tag_bg_color').value = s.tag_bg_color;
+    });
+  </script>
+</head>
+<body>
+  <div class="admin-wrap">
+    <h1>Admin</h1>
+    <form class="grid" onsubmit="saveSettings(event)">
+      <div class="section">
+        <h2>Algemene instellingen</h2>
+        <label for="title" class="muted">Titel homepage</label>
+        <input type="text" id="title" name="title" placeholder="Titel homepage">
+
+        <label for="register_title" class="muted" style="margin-top:12px">Titel registratiepagina</label>
+        <input type="text" id="register_title" name="register_title" placeholder="Titel register">
+        <div class="section">
+          <div class="muted">Taal</div>
+          <div class="row">
+            <label><input type="radio" name="language" value="nl" checked> Nederlands</label>
+            <label><input type="radio" name="language" value="en"> Engels</label>
+          </div>
+          <p class="muted">Bepaalt “Aantal ingecheckt/Number of check-ins” op de homepage en de labels op register.</p>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Kleuren homepage</h2>
+        <div class="grid cols-2">
+          <div>
+            <label class="muted">Primair (header, randen)</label>
+            <input type="color" id="primary_color" name="primary_color" value="#008387">
+          </div>
+          <div>
+            <label class="muted">Knop</label>
+            <input type="color" id="button_color" name="button_color" value="#3498db">
+          </div>
+          <div>
+            <label class="muted">Knop hover</label>
+            <input type="color" id="button_hover_color" name="button_hover_color" value="#2980b9">
+          </div>
+          <div>
+            <label class="muted">Expertise-tag achtergrond</label>
+            <input type="color" id="tag_bg_color" name="tag_bg_color" value="#e1f0fa">
+          </div>
+        </div>
+        <div class="row" style="margin-top:12px">
+          <button type="button" onclick="resetColors()">Standaard kleuren herstellen</button>
+        </div>
+      </div>
+
+      <div class="section row">
+        <button type="submit">Opslaan</button>
+      </div>
+    </form>
+
+    <div class="section">
+      <h2>Deelnemersbeheer</h2>
+      <div class="row">
+        <button type="button" onclick="exportCSV()">Exporteer naar CSV</button>
+        <button type="button" class="reset-button" onclick="resetParticipants()">Reset deelnemers</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

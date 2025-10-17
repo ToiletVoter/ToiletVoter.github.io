@@ -1,124 +1,172 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Evenementregistratie</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@1"></script>
-    <script>
-      const supabaseUrl = 'https://wzvmortgwqhwocgewudd.supabase.co';
-      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6dm1vcnRnd3Fod29jZ2V3dWRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU0ODg1ODMsImV4cCI6MjA2MTA2NDU4M30.U_tGy-YbuyE4pWkRNYWSe9L9UGqAb5aCMHJPLD9ZaxI';
-      const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-    </script>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Evenementregistratie</title>
+  <link rel="stylesheet" href="css/styles.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@1"></script>
+  <script>
+    const supabaseUrl = 'https://wzvmortgwqhwocgewudd.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6dm1vcnRnd3Fod29jZ2V3dWRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU0ODg1ODMsImV4cCI6MjA2MTA2NDU4M30.U_tGy-YbuyE4pWkRNYWSe9L9UGqAb5aCMHJPLD9ZaxI';
+    const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+    const t = {
+      nl:{
+        welcome:'Welkom bij de Onderzoeksbijeenkomst AI & Health',
+        fullName:'Volledige naam:',
+        photo:'Profielfoto:',
+        expertise:'Expertise/rol (max 3 trefwoorden):',
+        expertisePh:'bijv. Machine Learning, Medical Device Regulation, MBRT',
+        company:'Bedrijf/organisatie:',
+        companyPh:'bijv. CoE Health, Verpleegkunde, lectoraat AI & Data',
+        checkIn:'Inchecken',
+        photoAlert:'Kies alstublieft een profielfoto.',
+        success:'Succesvol ingecheckt! Welkom bij het evenement.',
+        error:'Er is een fout opgetreden: '
+      },
+      en:{
+        welcome:'Welcome to the AI & Health Research Meeting',
+        fullName:'Full name:',
+        photo:'Profile photo:',
+        expertise:'Expertise/role (max 3 keywords):',
+        expertisePh:'e.g. Machine Learning, Medical Device Regulation, MBRT',
+        company:'Company/organization:',
+        companyPh:'e.g. CoE Health, Nursing, AI & Data research group',
+        checkIn:'Check in',
+        photoAlert:'Please select a profile photo.',
+        success:'Checked in successfully! Welcome to the event.',
+        error:'An error occurred: '
+      }
+    };
+
+    async function applySettings(){
+  const { data } = await supabaseClient
+    .from('settings')
+    .select('*')
+    .eq('id','global')
+    .single();
+
+  const lang = (data?.language || 'nl').toLowerCase();
+
+  // titelkeuze voor register
+  const eventTitle = (data?.register_title && data.register_title.trim())
+    ? data.register_title.trim()
+    : (data?.title?.trim() || 'Onderzoeksbijeenkomst AI & Health');
+
+  // <title> van de pagina blijft “Evenementregistratie” of “Event registration”
+  document.title = lang === 'en' ? 'Event registration' : 'Evenementregistratie';
+
+  // H1 met eventtitel in de juiste taalregel
+  const welcome = document.getElementById('welcome');
+  welcome.textContent = (lang === 'en')
+    ? `Welcome to ${eventTitle}`
+    : `Welkom bij ${eventTitle}`;
+
+  // kleuren
+  const root = document.documentElement;
+  root.style.setProperty('--primary', data?.primary_color || '#008387');
+  root.style.setProperty('--btn', data?.button_color || '#3498db');
+  root.style.setProperty('--btn-hover', data?.button_hover_color || '#2980b9');
+  root.style.setProperty('--tag-bg', data?.tag_bg_color || '#e1f0fa');
+
+  // bewaar je bestaande i18n submit-strings zoals je al deed
+}
+
+
+    document.addEventListener('DOMContentLoaded', applySettings);
+  </script>
 </head>
 <body>
-    <div class="registration-container">
-        <h1>Welkom bij de Onderzoeksbijeenkomst AI & Health</h1>
-        <form id="registrationForm">
-            <div class="form-group">
-                <label for="name">Volledige naam:</label>
-                <input type="text" id="name" name="name" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="photo">Profielfoto:</label>
-                <input type="file" id="photo" name="photo" accept="image/*" required>
-                <div id="photo-preview"></div>
-            </div>
-            
-            <div class="form-group">
-                <label for="expertise">Expertise/Rol (max 3 trefwoorden):</label>
-                <input type="text" id="expertise" name="expertise" placeholder="bijv. Machine Learning, Medical Device Regulation, MBRT" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="company">Bedrijf/Organisatie:</label>
-                <input type="text" id="company" name="company" placeholder="bijv. CoE Health, Verpleegkunde, lectoraat AI & Data" required>
-            </div>
-            
-            <button type="submit">Inchecken</button>
-        </form>
-    </div>
+  <div class="registration-container">
+    <h1 id="welcome"></h1>
+    <form id="registrationForm">
+      <div class="form-group">
+        <label for="name">Volledige naam:</label>
+        <input type="text" id="name" name="name" required>
+      </div>
 
-    <script>
-    // Foto preview weergeven
-    document.getElementById('photo').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                const img = document.createElement('img');
-                img.src = event.target.result;
-                
-                const photoPreview = document.getElementById('photo-preview');
-                photoPreview.innerHTML = '';
-                photoPreview.appendChild(img);
-            }
-            reader.readAsDataURL(file);
-        }
+      <div class="form-group">
+        <label for="photo">Profielfoto:</label>
+        <input type="file" id="photo" name="photo" accept="image/*" required>
+        <div id="photo-preview"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="expertise">Expertise/Rol (max 3 trefwoorden):</label>
+        <input type="text" id="expertise" name="expertise" placeholder="bijv. Machine Learning, Medical Device Regulation, MBRT" required>
+      </div>
+
+      <div class="form-group">
+        <label for="company">Bedrijf/Organisatie:</label>
+        <input type="text" id="company" name="company" placeholder="bijv. CoE Health, Verpleegkunde, lectoraat AI & Data" required>
+      </div>
+
+      <button type="submit">Inchecken</button>
+    </form>
+  </div>
+
+  <script>
+    // Foto preview
+    document.getElementById('photo').addEventListener('change', e=>{
+      const file = e.target.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = evt=>{
+        const img = document.createElement('img');
+        img.src = evt.target.result;
+        const box = document.getElementById('photo-preview');
+        box.innerHTML = ''; box.appendChild(img);
+      };
+      reader.readAsDataURL(file);
     });
 
-    // Registratiegegevens verzenden met Supabase
-    document.getElementById('registrationForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
+    // Submit
+    document.getElementById('registrationForm').addEventListener('submit', async e=>{
+      e.preventDefault();
+      const tr = window.__i18n_submit || {
+        photoAlert:'Kies alstublieft een profielfoto.',
+        success:'Succesvol ingecheckt! Welkom bij het evenement.',
+        error:'Er is een fout opgetreden: '
+      };
 
-        const name = document.getElementById('name').value;
-        const expertiseInput = document.getElementById('expertise').value;
-        const company = document.getElementById('company').value;
-        const photoFile = document.getElementById('photo').files[0];
+      const name = document.getElementById('name').value;
+      const expertiseInput = document.getElementById('expertise').value;
+      const company = document.getElementById('company').value;
+      const photoFile = document.getElementById('photo').files[0];
 
-        const expertise = expertiseInput.split(',')
-            .map(item => item.trim())
-            .filter(item => item !== '')
-            .slice(0, 3);
+      const expertise = expertiseInput.split(',')
+        .map(s=>s.trim()).filter(Boolean).slice(0,3);
 
-        if (!photoFile) {
-            alert('Kies alstublieft een profielfoto.');
-            return;
-        }
+      if(!photoFile){ alert(tr.photoAlert); return; }
 
-        try {
-            // 1. Upload foto naar Supabase Storage
-            const fileExt = photoFile.name.split('.').pop();
-            const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-            const { data, error } = await supabaseClient
-                .storage
-                .from('profile-photos')
-                .upload(fileName, photoFile);
+      try{
+        const fileExt = photoFile.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
 
-            if (error) throw error;
+        const { error: upErr } = await supabaseClient
+          .storage.from('profile-photos')
+          .upload(fileName, photoFile);
+        if(upErr) throw upErr;
 
-            // 2. Genereer public URL (let op de juiste destructuring!)
-            const { publicURL, error: publicUrlError } = supabaseClient
-                .storage
-                .from('profile-photos')
-                .getPublicUrl(fileName);
+        const { publicURL, error: urlErr } = supabaseClient
+          .storage.from('profile-photos')
+          .getPublicUrl(fileName);
+        if(urlErr) throw urlErr;
 
-            if (publicUrlError) throw publicUrlError;
+        const { error: dbErr } = await supabaseClient
+          .from('participants')
+          .insert([{ name, expertise, company, photo_url: publicURL, timestamp: new Date().toISOString() }]);
+        if(dbErr) throw dbErr;
 
-            // 3. Sla deelnemer op in Supabase tabel
-            const { error: dbError } = await supabaseClient
-                .from('participants')
-                .insert([{
-                    name,
-                    expertise,
-                    company,
-                    photo_url: publicURL,
-                    timestamp: new Date().toISOString()
-                }]);
-
-            if (dbError) throw dbError;
-
-            alert('Succesvol ingecheckt! Welkom bij het evenement.');
-            document.getElementById('registrationForm').reset();
-            document.getElementById('photo-preview').innerHTML = '';
-
-        } catch (error) {
-            console.error("Fout bij registratie:", error);
-            alert("Er is een fout opgetreden: " + error.message);
-        }
+        alert(tr.success);
+        e.target.reset();
+        document.getElementById('photo-preview').innerHTML = '';
+      }catch(err){
+        console.error(err);
+        alert(tr.error + err.message);
+      }
     });
-    </script>
+  </script>
 </body>
 </html>

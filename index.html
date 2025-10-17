@@ -1,50 +1,77 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Onderzoeksbijeenkomst AI & Health</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <!-- Gebruik v1! -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@1"></script>
-    <script>
-      // Vervang deze waarden door jouw eigen Supabase project details:
-      const supabaseUrl = 'https://wzvmortgwqhwocgewudd.supabase.co';
-      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6dm1vcnRnd3Fod29jZ2V3dWRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU0ODg1ODMsImV4cCI6MjA2MTA2NDU4M30.U_tGy-YbuyE4pWkRNYWSe9L9UGqAb5aCMHJPLD9ZaxI'; // LET OP: alleen public anon key gebruiken!
-      // Noem je client NIET supabase, maar supabaseClient:
-      const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-    </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Onderzoeksbijeenkomst AI & Health</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@1"></script>
+  <script>
+    const supabaseUrl = 'https://wzvmortgwqhwocgewudd.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6dm1vcnRnd3Fod29jZ2V3dWRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU0ODg1ODMsImV4cCI6MjA2MTA2NDU4M30.U_tGy-YbuyE4pWkRNYWSe9L9UGqAb5aCMHJPLD9ZaxI';
+    window.supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+    const i18n = {
+      nl: { checkedIn: 'Aantal ingecheckt:' },
+      en: { checkedIn: 'Number of check-ins:' }
+    };
+
+    async function applySettings(){
+      const { data, error } = await window.supabaseClient
+        .from('settings')
+        .select('*')
+        .eq('id','global')
+        .single();
+      if(error){ console.warn(error); return; }
+
+      // titel
+      document.title = data.title || document.title;
+      const h1 = document.querySelector('header h1');
+      if(h1) h1.textContent = data.title || h1.textContent;
+
+      // taal teller
+      const lang = (data.language || 'nl').toLowerCase();
+      const label = i18n[lang]?.checkedIn || i18n.nl.checkedIn;
+      document.getElementById('participant-count').textContent = `${label} 0`;
+
+      // kleuren doorvoeren via :root variabelen
+      const root = document.documentElement;
+      root.style.setProperty('--primary', data.primary_color || '#008387');
+      root.style.setProperty('--btn', data.button_color || '#3498db');
+      root.style.setProperty('--btn-hover', data.button_hover_color || '#2980b9');
+      root.style.setProperty('--tag-bg', data.tag_bg_color || '#e1f0fa');
+
+      // html lang attribuut zetten
+      document.documentElement.lang = lang;
+    }
+
+    document.addEventListener('DOMContentLoaded', applySettings);
+  </script>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Onderzoeksbijeenkomst AI & Health</h1>
-            <div class="controls">
-                <span id="participant-count">Aantal ingecheckt: 0</span>
-                <button id="export-button">Exporteer naar CSV</button>
-                <button id="reset-button" class="reset-button">Reset deelnemers</button>
-            </div>
-        </header>        
-        <div id="display-container">
-            <!-- Hier worden de deelnemers dynamisch toegevoegd -->
-        </div>
-    </div>
-    
-    <script>
-    // Geef supabaseClient door aan je display.js als dat nodig is.
-    // Of gebruik window.supabaseClient zodat display.js hem kan vinden!
-    window.supabaseClient = supabaseClient;
-    </script>
-    <script src="js/display.js"></script>
-    <div id="reset-modal" class="modal">
+  <div class="container">
+    <header>
+      <h1>Onderzoeksbijeenkomst AI & Health</h1>
+      <div class="controls">
+        <span id="participant-count">Aantal ingecheckt: 0</span>
+        <!-- Export en Reset zijn verplaatst naar admin.html -->
+      </div>
+    </header>
+    <div id="display-container"><!-- dynamische deelnemers --></div>
+  </div>
+
+  <script src="js/display.js"></script>
+
+  <!-- Als je je oude reset-modal nog gebruikt, kun je hem laten staan of naar admin verplaatsen -->
+  <div id="reset-modal" class="modal">
     <div class="modal-content">
-        <h2>Bevestig Reset</h2>
-        <p>Weet je zeker dat je alle deelnemers wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.</p>
-        <div class="modal-buttons">
-            <button id="confirm-reset" class="modal-button confirm-button">Ja, Reset Alles</button>
-            <button id="cancel-reset" class="modal-button cancel-button">Annuleren</button>
-        </div>
+      <h2>Bevestig reset</h2>
+      <p>Weet je zeker dat je alle deelnemers wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.</p>
+      <div class="modal-buttons">
+        <button id="confirm-reset" class="modal-button confirm-button">Ja, reset alles</button>
+        <button id="cancel-reset" class="modal-button cancel-button">Annuleren</button>
+      </div>
     </div>
-</div>
+  </div>
 </body>
 </html>
