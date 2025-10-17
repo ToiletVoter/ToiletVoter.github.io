@@ -7,75 +7,73 @@
   <link rel="stylesheet" href="css/styles.css"/>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@1"></script>
   <script>
-    const supabaseUrl = 'https://wzvmortgwqhwocgewudd.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6dm1vcnRnd3Fod29jZ2V3dWRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU0ODg1ODMsImV4cCI6MjA2MTA2NDU4M30.U_tGy-YbuyE4pWkRNYWSe9L9UGqAb5aCMHJPLD9ZaxI';
-    const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+  const t = {
+    nl:{
+      welcome:'Welkom bij',
+      fullName:'Volledige naam:',
+      photo:'Profielfoto:',
+      expertise:'Expertise/rol (max 3 trefwoorden):',
+      expertisePh:'bijv. Machine Learning, Medical Device Regulation, MBRT',
+      company:'Bedrijf/organisatie:',
+      companyPh:'bijv. CoE Health, Verpleegkunde, lectoraat AI & Data',
+      checkIn:'Inchecken',
+      photoAlert:'Kies alstublieft een profielfoto.',
+      success:'Succesvol ingecheckt! Welkom bij het evenement.',
+      error:'Er is een fout opgetreden: '
+    },
+    en:{
+      welcome:'Welcome to',
+      fullName:'Full name:',
+      photo:'Profile photo:',
+      expertise:'Expertise/role (max 3 keywords):',
+      expertisePh:'e.g. Machine Learning, Medical Device Regulation, MBRT',
+      company:'Company/organization:',
+      companyPh:'e.g. CoE Health, Nursing, AI & Data research group',
+      checkIn:'Check in',
+      photoAlert:'Please select a profile photo.',
+      success:'Checked in successfully! Welcome to the event.',
+      error:'An error occurred: '
+    }
+  };
 
-    const t = {
-      nl:{
-        welcome:'Welkom bij de Onderzoeksbijeenkomst AI & Health',
-        fullName:'Volledige naam:',
-        photo:'Profielfoto:',
-        expertise:'Expertise/rol (max 3 trefwoorden):',
-        expertisePh:'bijv. Machine Learning, Medical Device Regulation, MBRT',
-        company:'Bedrijf/organisatie:',
-        companyPh:'bijv. CoE Health, Verpleegkunde, lectoraat AI & Data',
-        checkIn:'Inchecken',
-        photoAlert:'Kies alstublieft een profielfoto.',
-        success:'Succesvol ingecheckt! Welkom bij het evenement.',
-        error:'Er is een fout opgetreden: '
-      },
-      en:{
-        welcome:'Welcome to the AI & Health Research Meeting',
-        fullName:'Full name:',
-        photo:'Profile photo:',
-        expertise:'Expertise/role (max 3 keywords):',
-        expertisePh:'e.g. Machine Learning, Medical Device Regulation, MBRT',
-        company:'Company/organization:',
-        companyPh:'e.g. CoE Health, Nursing, AI & Data research group',
-        checkIn:'Check in',
-        photoAlert:'Please select a profile photo.',
-        success:'Checked in successfully! Welcome to the event.',
-        error:'An error occurred: '
-      }
-    };
+  async function applySettings(){
+    const { data } = await supabaseClient.from('settings').select('*').eq('id','global').single();
 
-    async function applySettings(){
-  const { data } = await supabaseClient
-    .from('settings')
-    .select('*')
-    .eq('id','global')
-    .single();
+    const lang = (data?.language || 'nl').toLowerCase();
+    const tr = t[lang] || t.nl;
 
-  const lang = (data?.language || 'nl').toLowerCase();
+    document.documentElement.lang = lang;
+    document.title = lang === 'en' ? 'Event registration' : 'Evenementregistratie';
 
-  // titelkeuze voor register
-  const eventTitle = (data?.register_title && data.register_title.trim())
-    ? data.register_title.trim()
-    : (data?.title?.trim() || 'Onderzoeksbijeenkomst AI & Health');
+    const eventTitle = (data?.register_title && data.register_title.trim())
+      ? data.register_title.trim()
+      : (data?.title?.trim() || 'Onderzoeksbijeenkomst AI & Health');
 
-  // <title> van de pagina blijft “Evenementregistratie” of “Event registration”
-  document.title = lang === 'en' ? 'Event registration' : 'Evenementregistratie';
+    const welcome = document.getElementById('welcome');
+    welcome.textContent = `${tr.welcome} ${eventTitle}`;
 
-  // H1 met eventtitel in de juiste taalregel
-  const welcome = document.getElementById('welcome');
-  welcome.textContent = (lang === 'en')
-    ? `Welcome to ${eventTitle}`
-    : `Welkom bij ${eventTitle}`;
+    // labels en placeholders
+    document.querySelector('label[for="name"]').textContent = tr.fullName;
+    document.querySelector('label[for="photo"]').textContent = tr.photo;
+    document.querySelector('label[for="expertise"]').textContent = tr.expertise;
+    document.getElementById('expertise').placeholder = tr.expertisePh;
+    document.querySelector('label[for="company"]').textContent = tr.company;
+    document.getElementById('company').placeholder = tr.companyPh;
+    document.querySelector('button[type="submit"]').textContent = tr.checkIn;
 
-  // kleuren
-  const root = document.documentElement;
-  root.style.setProperty('--primary', data?.primary_color || '#008387');
-  root.style.setProperty('--btn', data?.button_color || '#3498db');
-  root.style.setProperty('--btn-hover', data?.button_hover_color || '#2980b9');
-  root.style.setProperty('--tag-bg', data?.tag_bg_color || '#e1f0fa');
+    // kleuren
+    const root = document.documentElement;
+    root.style.setProperty('--primary', data?.primary_color || '#008387');
+    root.style.setProperty('--btn', data?.button_color || '#3498db');
+    root.style.setProperty('--btn-hover', data?.button_hover_color || '#2980b9');
+    root.style.setProperty('--tag-bg', data?.tag_bg_color || '#e1f0fa');
 
-  // bewaar je bestaande i18n submit-strings zoals je al deed
-}
+    // voor submit/alerts
+    window.__i18n_submit = tr;
+  }
 
-
-    document.addEventListener('DOMContentLoaded', applySettings);
-  </script>
+  document.addEventListener('DOMContentLoaded', applySettings);
+</script>
 </head>
 <body>
   <div class="registration-container">
